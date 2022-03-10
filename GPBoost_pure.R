@@ -17,7 +17,7 @@ str(data)
 
 # Splitting data -----
 X <- subset(data, select = -c(target))
-y <- data$quantity_log
+y <- data$target
 
 char <- X[, sapply(X, class) == 'character']
 char <- char %>% 
