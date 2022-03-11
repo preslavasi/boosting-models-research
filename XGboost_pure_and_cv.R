@@ -57,26 +57,23 @@ R2(pred, y_test)
 ########################## with grid search and CV ###########################
 
 # Transformations
-cat11_results_init_nona <- cat11_results_init %>%
-  group_by(priceline_id, promo_zone_id) %>%
-  na.locf(is.na(cat11_results_init), na.rm = FALSE)
 
-cat11_results_init_nona <- cat11_results_init_nona %>% 
+data <- data %>% 
   mutate_if(is.integer, as.numeric)
 
-cat11_results_init_nona <- cat11_results_init_nona %>% 
+data <- data %>% 
   mutate_if(is.character, as.factor)
 
-cat11_results_init_nona <- cat11_results_init_nona %>% 
+data <- data %>% 
   mutate_if(is.factor, as.numeric)
 
 # Splitting 
 
-smp_size <- floor(0.80 * nrow(cat11_results_init))
-train_ind_gr <- sample(seq_len(nrow(cat11_results_init_nona)), size = smp_size)
+smp_size <- floor(0.80 * nrow(data))
+train_ind_gr <- sample(seq_len(nrow(data)), size = smp_size)
 
-train_gr <- cat11_results_init_nona[train_ind_gr, ]
-test_gr <- cat11_results_init_nona[-train_ind_gr, ]
+train_gr <- data[train_ind_gr, ]
+test_gr <- data[-train_ind_gr, ]
   
 # Grid search 
 xgb_grid = expand.grid(
