@@ -44,8 +44,6 @@ re <- c()
 
 re_data <- X_train[, colnames(X_train) %in% re]
 
-############################# NO CV ############################
-
 # Transformations -----
 dtrain <- gpb.Dataset(data = as.matrix(X_train), label = as.matrix(y_train))
 dtrain <- gpb.Dataset.set.categorical(dtrain, categorical_feature = cat)
@@ -122,5 +120,36 @@ cvbst <- gpb.cv(params = params_m,
 print(paste0("Optimal number of iterations: ", cvbst$best_iter,
              ", best test error: ", cvbst$best_score))
 
-# "Optimal number of iterations: 155, best test error: 0.153448093535704" used on dtrain with covX
+# Train -----
+gpb_model <- gpboost(dtrain, params = params, nrounds = cvbst$best_iter, gp_model = gp_model, use_gp_model_for_validation = FALSE)
+summary(gpb_model)
+
+# Predict -----
+re_data_test <- X_test[, colnames(X_test) %in% re]
+
+pred <- predict(gpb_model, data = as.matrix(X_test), group_data_pred = re_data_test,
+                predict_var = TRUE)
+
+pred$random_effect_mean
+pred$random_effect_cov
+pred$fixed_effect
+
+y_pred <- pred$random_effect_mean + pred$fixed_effect
+
+# Evaluation -----
+rmse(y_test, y_pred) # 0.1950308
+mean(abs((y_test-y_pred)/y_test)) * 100 # 1.705588
+Gini(y_pred, y_test) # 0.9954297
+R2(y_pred, y_test) # 0.9869513
+
+plot(x = y_pred, y = y_test,
+     xlab='Predicted Values',
+     ylab='Actual Values',
+     main='Predicted vs. Actual Values',
+     col = c("blue", "red"))
+
+# Feature importance -----
+fe_imp <- gpb.importance(gpb_model, percentage = TRUE)
+gpb.plot.importance(fe_imp, top_n = 20, measure = "Gain") 
+
 
