@@ -84,10 +84,10 @@ pred$random_effect_mean
 y_pred <- pred$fixed_effect + pred$random_effect_mean
 
 # Evaluation ----- 
-rmse(y_test, y_pred) # 0.4056306 => with covX  0.406733
-mean(abs((y_test-y_pred)/y_test)) * 100 # 2.971379 => with covX 3.008614
-Gini(y_pred, y_test) # 0. 0.9858373 => with covX 0.9856584
-R2(y_pred, y_test) # 0.9522957 => with covX 0.9522556
+rmse(y_test, y_pred) 
+mean(abs((y_test-y_pred)/y_test)) * 100
+Gini(y_pred, y_test) 
+R2(y_pred, y_test) 
 RMSE <- sqrt(mean((y_pred - y_test)^2))
 
 # Feature importance -----
