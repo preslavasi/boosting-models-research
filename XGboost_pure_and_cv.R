@@ -104,16 +104,13 @@ saveRDS(xgb_model, "./xgb_model.rds")
 
 results <- xgb_model$results
 
-# RMSE        R2           MAE          RMSESD         R2SD          MAESD
-# 0.3756644   0.9538713    0.2612461    0.010969988    0.002924889   0.005602590
 
 pred <- predict(xgb_model, test_gr)
 
 y_test <- test_gr$quantity_log
 
-mean((y_test - pred)^2) # 0.1309525
-RMSE(y_test, pred) # 0.3618736
-
+mean((y_test - pred)^2)
+RMSE(y_test, pred) 
 # Feature importance -----
 xgb_imp <- varImp(xgb_model)
 xgb_fe_imp <- xgb_imp$importance
