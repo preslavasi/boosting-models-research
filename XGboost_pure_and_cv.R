@@ -95,36 +95,7 @@ xgb_trcontrol = trainControl(
   allowParallel = TRUE
 )
 
-xgb_model <- train(quantity_log ~ 0 + loess_4:model_category_id + master_adj_spline:promo_zone_id + 
-                     price_log:priceline_id + promo_tact_min_purch_bagb_pct:promo_zone_id + 
-                     promo_feat_ad_2:promo_zone_id + cpi_index_log:promo_zone_id + 
-                     promo_overlay_2_val:promo_zone_id + hol_newyear:promo_zone_id + 
-                     hol_postnewyear:promo_zone_id + hol_superbowl:promo_zone_id + 
-                     hol_week_prexms:promo_zone_id + hol_pre_thanksgiving:promo_zone_id + 
-                     hol_pos_flag:promo_zone_id + hol_co01_r:promo_zone_id + hol_co02_r:promo_zone_id + 
-                     hol_co03_r:promo_zone_id + hol_co04_r:promo_zone_id + hol_co05_r:promo_zone_id + 
-                     hol_co06_r:promo_zone_id + hol_co07_r:promo_zone_id + hol_co08_r:promo_zone_id + 
-                     hol_co09_r:promo_zone_id + hol_co10_r:promo_zone_id + promo_coupon_2_pct:model_cpi_group + 
-                     hol_week_xms:model_cpi_group + hol_first_shop_day:model_cpi_group + 
-                     hol_labor_day:model_cpi_group + hol_valentines:model_cpi_group + 
-                     hol_cinco_mayo:model_cpi_group + hol_co01:model_cpi_group + 
-                     hol_co02:model_cpi_group + hol_co03:model_cpi_group + hol_co04:model_cpi_group + 
-                     hol_co05:model_cpi_group + hol_co06:model_cpi_group + hol_co07:model_cpi_group + 
-                     hol_co08:model_cpi_group + hol_co09:model_cpi_group + hol_co10:model_cpi_group + 
-                     promo_tact_promo_price_pct:priceline_id + promo_overlay_1_val:priceline_id + 
-                     promo_feat_ad_1:priceline_id + promo_tact_bagb_pct:priceline_id + 
-                     promo_feat_ad_3:is_private_label + covid_price_log:hol_covid + 
-                     promo_tact_bqgq_pct:promo_zone_id + promo_tact_dol_off_pct:promo_zone_id + 
-                     promo_feat_ad_front_pct:promo_zone_id + promo_feat_ad_back_pct:promo_zone_id + 
-                     promo_feat_ad_wrap_pct:promo_zone_id + promo_feat_ad_inside_pct:promo_zone_id + 
-                     hol_veterens:promo_zone_id + promo_tact_pct_off_pct + promo_log_glbl_cpn_rdm + 
-                     promo_overlay_3_pct + promo_overlay_4_pct + promo_overlay_5_pct + 
-                     promo_coupon_1_pct + promo_tact_min_purch_pct + promo_tact_mlt_buy_pct + 
-                     hol_stock_out + (0 + promo_tact_bqgq_pct | key) + (0 + promo_tact_dol_off_pct | 
-                                                                          key) + (0 + promo_feat_ad_front_pct | key) + (0 + promo_feat_ad_back_pct | 
-                                                                                                                          key) + (0 + promo_feat_ad_wrap_pct | key) + (0 + promo_feat_ad_inside_pct | 
-                                                                                                                                                                         key) + (0 + hol_veterens | key) + (0 + price_log | key) + 
-                     (1 | key), data = train_gr, method = "xgbTree", trControl = xgb_trcontrol, tuneGrid = xgb_grid)
+xgb_model <- train(target ~ . , data = train_gr, method = "xgbTree", trControl = xgb_trcontrol, tuneGrid = xgb_grid) # our case was with specific formula, implemented in mixed models
 
 # Selecting tuning parameters
 # Fitting nrounds = 287, max_depth = 12, eta = 0.03, gamma = 0, colsample_bytree = 0.7, min_child_weight = 0, subsample = 0.75 on full training set
