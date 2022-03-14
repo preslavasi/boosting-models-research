@@ -137,10 +137,10 @@ pred$fixed_effect
 y_pred <- pred$random_effect_mean + pred$fixed_effect
 
 # Evaluation -----
-rmse(y_test, y_pred) # 0.1950308
-mean(abs((y_test-y_pred)/y_test)) * 100 # 1.705588
-Gini(y_pred, y_test) # 0.9954297
-R2(y_pred, y_test) # 0.9869513
+rmse(y_test, y_pred) 
+mean(abs((y_test-y_pred)/y_test)) * 100 
+Gini(y_pred, y_test) 
+R2(y_pred, y_test) 
 
 plot(x = y_pred, y = y_test,
      xlab='Predicted Values',
