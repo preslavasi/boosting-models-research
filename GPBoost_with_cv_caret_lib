@@ -1,0 +1,120 @@
+library(caret)
+library(dplyr)
+library(gpboost)
+library(MLmetrics)
+library(mltools)
+library(stats)
+library(utils)
+library(zoo)
+
+# Importing data -----
+setwd("")
+
+set.seed(123)
+
+# EDA -----
+str(data)
+
+# Splitting data -----
+X <- subset(data, select = -c(target))
+y <- data$target
+
+char <- X[, sapply(X, class) == 'character']
+char <- char %>% 
+  mutate_if(is.character, as.factor)
+cat <- colnames(char)
+
+# Splitting data NO CV -----
+smp_size <- floor(0.80 * nrow(X))
+train_ind <- sample(seq_len(nrow(X)), size = smp_size)
+
+X <- X %>% 
+  mutate_if(is.character, as.factor)%>% 
+  mutate_if(is.factor, as.numeric)
+
+X_train <- X[train_ind, ]
+X_test <- X[-train_ind, ]
+
+y_train <- y[train_ind]
+y_test <- y[-train_ind]
+
+# Setting random effects -----
+re <- c()
+
+re_data <- X_train[, colnames(X_train) %in% re]
+
+# Transformations -----
+dtrain <- gpb.Dataset(data = as.matrix(X_train), label = as.matrix(y_train))
+dtrain <- gpb.Dataset.set.categorical(dtrain, categorical_feature = cat)
+
+dvalid <- gpb.Dataset(data = as.matrix(X_test), label = as.matrix(y_test))
+dvalid <- gpb.Dataset.set.categorical(dvalid, categorical_feature = cat)
+
+# Creating covariates for features
+covX <- cov(X[!names(X) %in% re])
+
+# Modelling -----
+gp_model <- GPModel(group_data = re_data, gp_rand_coef_data = covX)
+
+########################## CV with GPBoost ############################
+
+# Grid search -----
+params <- list(objective = "regression")
+param_grid = list("learning_rate" = c(0.03,0.02,0.01), "min_data_in_leaf" = c(3,12,20),
+                  "max_depth" = c(6,8,10), "max_bin" = c(87,164,255))
+start_time <- proc.time()
+opt_params <- gpb.grid.search.tune.parameters(param_grid = param_grid,
+                                              params = params,
+                                              num_try_random = NULL,
+                                              nfold = 8,
+                                              data = dtrain,
+                                              gp_model = gp_model,
+                                              verbose_eval = 2,
+                                              categorical_feature = cat,
+                                              nrounds = 200,
+                                              early_stopping_rounds = 5,
+                                              eval = "rmse")
+(run_time <- proc.time() - start_time)
+print(opt_params)
+
+# Transformations -----
+cat11_results_init <- cat11_results_init%>% 
+  mutate_if(is.integer, as.numeric)%>% 
+  mutate_if(is.character, as.factor)%>%
+  mutate_if(is.factor, as.numeric)
+
+# CV -----
+params <- list(learning_rate = 0.01,
+               max_depth = 6,
+               min_data_in_leaf = 20,
+               objective = "regression",
+               metric = "RMSE",
+               max_bin = 87,
+               verbose = 1,
+               categorical_feature = cat
+)
+
+trcontrol <- trainControl(method = "cv", number = 5)
+
+#################### simple CV formula ####################
+
+model <- train(form = custom formula, data = data, method = "gaussprLinear",
+               trControl = trcontrol)
+model
+
+# Saving model
+saveRDS(model, "gpb_cv.rds")
+
+# Prediction ----
+y_pred <- predict(model, X_test)
+
+rmse(y_pred, y_test) # 1.105941
+mean(abs((y_test-y_pred)/y_test)) * 100 # 11.47914
+Gini(y_pred, y_test) # 0.7887398
+R2(y_pred, y_test) # 0.5957484
+
+plot(x = y_pred, y = y_test,
+     xlab='Predicted Values',
+     ylab='Actual Values',
+     main='Predicted vs. Actual Values',
+     col = c("blue", "red"))
