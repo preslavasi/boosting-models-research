@@ -77,29 +77,9 @@ opt_params <- gpb.grid.search.tune.parameters(param_grid = param_grid,
                                               eval = "rmse")
 print(opt_params)
 
-# best_params
-# $best_params$learning_rate
-# [1] 0.01
-# 
-# $best_params$min_data_in_leaf
-# [1] 20
-# 
-# $best_params$max_depth
-# [1] 6
-# 
-# $best_params$max_bin
-# [1] 87
-# 
-# 
-# $best_iter
-# [1] 155
-# 
-# $best_score
-# [1] 0.1523698
-
 # Modelling -----
 
-# Create model
+# Create model (with optimal parameters from grid search)
 params_m <- list(learning_rate = 0.01,
                max_depth = 6,
                min_data_in_leaf = 20,
