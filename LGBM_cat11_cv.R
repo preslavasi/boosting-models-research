@@ -8,26 +8,25 @@ library(data.table)
 library(tidyr)
 
 ## Importing data -----
-setwd("/Users/preslava_ivanova/Box Sync/Preslava/Mixed Models Investigation/Cat11")
+setwd("")
 
 set.seed(123)
 
 # EDA -----
 str(cat11_results_init)
 
-sum(is.na(cat11_results_init))
-colnames(cat11_results_init)[colSums(is.na(cat11_results_init)) > 0]
+sum(is.na(data))
+colnames(data)[colSums(is.na(data)) > 0]
 
 # Splitting data -----
-X <- subset(cat11_results_init, select = -c(quantity_log))
-y <- cat11_results_init$quantity_log
+X <- subset(data, select = -c(target))
+y <- data$target
 
 char <- X[, sapply(X, class) == 'character']
 char <- char %>% 
   mutate_if(is.character, as.factor)
 cat <- colnames(char)
 
-######################### NO CV ########################
 smp_size <- floor(0.80 * nrow(X))
 train_ind <- sample(seq_len(nrow(X)), size = smp_size)
 
@@ -40,8 +39,7 @@ y_test <- y[-train_ind]
 
 # Transformations for grid search -----
 X_train <- X_train %>% 
-  mutate_if(is.character, as.factor)
-X_test <- X_test %>% 
+  mutate_if(is.character, as.factor)%>% 
   mutate_if(is.character, as.factor)
 
 dtrain <- lgb.Dataset(data  = as.matrix(X_train),
@@ -87,7 +85,7 @@ lgb_model <- lgb.train(
 pred <- predict(lgbm_cv, as.matrix(X_test))
 
 # Evaluation ----- 
-rmse(y_test, pred) # 0.05297805
+rmse(y_test, pred) 
 mean(abs((y_test-pred)/y_test)) * 100 
 Gini(pred, y_test) 
 R2(pred, y_test)  
@@ -95,9 +93,8 @@ R2(pred, y_test)
 # too good to be true
 
 # Save LGBM model -----
-lgb.save(lgbm_model, tempfile(fileext = ".txt"))
-
 saveRDS(lgbm_model, "lgbm_model_grid.rds")
+
 # Importance -----
 lgbm_fe_imp <- lgb.importance(lgbm_model)
 
