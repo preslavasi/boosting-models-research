@@ -16,6 +16,17 @@ set.seed(123)
 # EDA -----
 str(data)
 
+# Plotting
+xyplot(y ~ x1 | x2, data = data, layout = c(6, 3),
+       xlab = "desctiption of independent variables",
+       ylab = "description of target", aspect = "xy")
+
+xyplot(target ~ x1 | x2, data, groups = Subject,
+       type = "a",
+       auto.key =
+         list(space = "right", lines = TRUE))
+
+
 # Splitting data -----
 X <- subset(data, select = -c(target))
 y <- data$target
